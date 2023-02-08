@@ -17,7 +17,9 @@ anything that can not be divided as a feature, goes into core directory. includi
 * Internationalization
 
 ##Feature
-we seperate each feature into user interface and state management (UI) and business logic + getting data from local or remote sources (provider)
+we seperate each feature into user interface and state management (UI) and business logic + getting data from local or remote sources (provider) and models
+
+#UI is seperated into state management (bloc) and anything visible on screen (view)
 
 
 
