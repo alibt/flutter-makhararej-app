@@ -3,25 +3,38 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthState extends Equatable {
   final User? user;
-  final bool isLoading;
 
-  const AuthState(this.user, this.isLoading);
+  const AuthState(
+    this.user,
+  );
 
   @override
-  List<Object?> get props => [user?.email, isLoading];
+  List<Object?> get props => [
+        user?.email,
+      ];
 }
 
 enum LoginStatus { success, failure, loading, init }
 
-class LoginState extends AuthState {
-  final LoginStatus state;
-  final String? message;
+class AuthInitState extends AuthState {
+  const AuthInitState(super.user);
+}
 
-  const LoginState({
-    required this.state,
-    this.message,
-  }) : super(null, false);
+class LoadingAuthState extends AuthState {
+  const LoadingAuthState(super.user);
+}
 
-  @override
-  List<Object?> get props => [state, message, super.props];
+class UnauthorizedState extends AuthState {
+  final String message;
+  const UnauthorizedState(super.user, {this.message = "Unknown Error"});
+}
+
+class AuthorizedState extends AuthState {
+  const AuthorizedState(super.user);
+}
+
+class RegisterationFailedState extends AuthState {
+  final String message;
+
+  const RegisterationFailedState(this.message) : super(null);
 }
