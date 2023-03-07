@@ -1,20 +1,28 @@
+import 'package:flutter/foundation.dart';
+import 'package:makharej_app/features/categories/models/expence_category.dart';
+
 abstract class CategoryEvent {
   const CategoryEvent();
 }
 
-class AddCategoryEvent extends CategoryEvent {
-  final String id;
-  final String title;
-  final String color;
-  final int? monthlyPrediction;
-  final String? icon;
-  AddCategoryEvent({
-    required this.id,
-    required this.title,
-    required this.color,
-    this.monthlyPrediction,
-    this.icon,
-  });
+class CategoryAddEvent extends CategoryEvent {
+  final ExpenseCategory category;
+  CategoryAddEvent({required this.category});
 }
 
-class UpdateCategoryEvent extends CategoryEvent {}
+class CategoryUpdateEvent extends CategoryEvent {
+  final Category category;
+  const CategoryUpdateEvent(this.category);
+}
+
+class CategoryFetchListEvent extends CategoryEvent {}
+
+class CategoryFetchDetailsEvent extends CategoryEvent {
+  final String id;
+  const CategoryFetchDetailsEvent(this.id);
+}
+
+class CategoryDeleteEvent extends CategoryEvent {
+  final String id;
+  const CategoryDeleteEvent(this.id);
+}
