@@ -1,7 +1,7 @@
 # Modiriyate Makharej
 This is an expence tracking application.
 
-#Folder Structure
+# Folder Structure
 Where to put the file you want to create?
 How to find the file you're looking for?
 
@@ -28,7 +28,7 @@ State management and business logic is bloc's responsiblity in this project.
 
 If a state is used in many screens globaly, it should be added as global bloc in root of the widget tree.
 
-repository classes (like in [authService.dart]) should be added to repository provider widget in [app.dart] file. They are responsible for getting data from local and remote data sources. 
+repository classes (like in [auth_provider.dart]) should be added to repository provider widget in [app.dart] file. They are responsible for getting data from local and remote data sources. 
 
 
 
