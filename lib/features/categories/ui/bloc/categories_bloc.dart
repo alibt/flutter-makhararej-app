@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:makharej_app/core/exceptions/network_exceptions.dart';
-import 'package:makharej_app/features/categories/models/expence_category.dart';
+import 'package:makharej_app/features/categories/models/makharej_category.dart';
 import 'package:makharej_app/features/categories/provider/categories_provider.dart';
 import 'package:makharej_app/features/categories/ui/bloc/categories_event.dart';
 import 'package:makharej_app/features/categories/ui/bloc/categories_state.dart';
 
 class CategoriesBloc extends Bloc<CategoryEvent, CategoryState> {
   final CategoryProvider categoryProvider;
-  List<ExpenseCategory> categories = [];
+  List<MakharejCategory> categories = [];
   CategoriesBloc(this.categoryProvider) : super(const CategoriesInitState([])) {
     on<CategoryFetchListEvent>(
         (event, emitter) => _onFetchCategoriesList(event, emitter));
@@ -30,7 +30,7 @@ class CategoriesBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   void _onSuccesfullyFetchedCategoriesList(
-      List<ExpenseCategory> list, Emitter<CategoryState> emitter) {
+      List<MakharejCategory> list, Emitter<CategoryState> emitter) {
     categories = list;
     emitter(CategoriesLoadedState(list));
   }
@@ -48,7 +48,7 @@ class CategoriesBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   void _onSuccussfullyAddedCategory(
-      ExpenseCategory category, Emitter<CategoryState> emitter, String catID) {
+      MakharejCategory category, Emitter<CategoryState> emitter, String catID) {
     category.id = catID;
     categories.add(category);
     emitter(CategoriesLoadedState(categories));

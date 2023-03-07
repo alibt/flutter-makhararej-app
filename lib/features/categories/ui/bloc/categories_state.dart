@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:makharej_app/features/categories/models/expence_category.dart';
+import 'package:makharej_app/features/categories/models/makharej_category.dart';
 
 @immutable
 abstract class CategoryState {
-  final List<ExpenseCategory> categories;
+  final List<MakharejCategory> categories;
 
   const CategoryState(this.categories);
 }
@@ -17,13 +17,13 @@ class CategoriesLoadingState extends CategoryState {
 }
 
 class CategoriesLoadedState extends CategoryState {
-  const CategoriesLoadedState(List<ExpenseCategory> categories)
+  const CategoriesLoadedState(List<MakharejCategory> categories)
       : super(categories);
 }
 
 class CategoriesErrorState extends CategoryState {
   final String message;
 
-  const CategoriesErrorState(List<ExpenseCategory> categories, this.message)
+  const CategoriesErrorState(List<MakharejCategory> categories, this.message)
       : super(categories);
 }

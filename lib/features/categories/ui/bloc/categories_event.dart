@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:makharej_app/features/categories/models/expence_category.dart';
+import 'package:makharej_app/features/categories/models/makharej_category.dart';
 
 abstract class CategoryEvent {
   const CategoryEvent();
 }
 
 class CategoryAddEvent extends CategoryEvent {
-  final ExpenseCategory category;
+  final MakharejCategory category;
   CategoryAddEvent({required this.category});
 }
 
