@@ -1,18 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
 
 class AuthProvider {
-  final FirebaseAuth _firebaseAuth =
-      FirebaseAuth.instanceFor(app: Firebase.app());
+  final FirebaseAuth firebaseAuth;
   UserCredential? _userCredential;
+  final GoogleSignIn _googleSignIn;
+
   UserCredential? get userCredential => _userCredential;
 
   User? getUser() {
-    return _firebaseAuth.currentUser;
+    return firebaseAuth.currentUser;
   }
+
+  AuthProvider(this.firebaseAuth, {GoogleSignIn? googleSignIn})
+      : _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   Future<Either<AuthException, bool>> loginUsingEmailAndPassword(
       {required String email, required String password}) async {
@@ -32,10 +36,10 @@ class AuthProvider {
 
   Future<Either<AuthException, bool>> loginUsingGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn();
-      final googleAccount = await googleSignIn.signIn();
-      if (googleAccount?.authentication != null) {
-        final googleAuth = await googleAccount!.authentication;
+      final googleAccount = await _googleSignIn.signIn();
+      final googleAuth = await googleAccount?.authentication;
+
+      if (googleAuth != null) {
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
