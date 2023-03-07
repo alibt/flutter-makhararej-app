@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void authBlocListener(context, state) {
     if (state is AuthenticatedState) {
-      RoutePaths.navigateHome(context);
+      RoutePaths.navigateHome();
     }
     if (state is UnauthorizedState) {
       ScaffoldMessenger.of(context).showSnackBar(

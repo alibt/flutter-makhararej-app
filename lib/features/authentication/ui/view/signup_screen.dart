@@ -56,7 +56,7 @@ class SignupScreenState extends State<SignupScreen> {
       return;
     }
     if (state is AuthenticatedState) {
-      RoutePaths.navigateHome(context);
+      RoutePaths.navigateHome();
     }
   }
 }

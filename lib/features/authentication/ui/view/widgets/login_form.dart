@@ -88,7 +88,7 @@ class _LoginFormState extends State<LoginForm> {
 
   void onSignUp(AuthBloc authBloc) {
     if (authBloc.state.isLoading) return;
-    RoutePaths.navigateSignUpScreen(context);
+    RoutePaths.navigateSignUpScreen();
   }
 
   void onLoginUsingEmailPassword(AuthBloc authBloc) {

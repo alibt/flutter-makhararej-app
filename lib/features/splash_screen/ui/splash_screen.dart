@@ -29,9 +29,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      if (state is AuthenticatedState) RoutePaths.navigateHome(context);
+      if (state is AuthenticatedState) RoutePaths.navigateHome();
       if (state is UnAuthenticatedState) {
-        RoutePaths.navigateLoginScreen(context);
+        RoutePaths.navigateLoginScreen();
       }
     }, builder: (context, state) {
       return Scaffold(
