@@ -9,7 +9,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthProvider authService;
   User? get user => authService.getUser();
 
-  AuthBloc(this.authService) : super(const AuthInitState(null)) {
+  AuthBloc(this.authService) : super(AuthInitState()) {
     on<LoginWithEmailAndPasswordEvent>(handleSignInUsingEmailAndPassword);
     on<LogoutEvent>(handleLogout);
     on<LoginWithGoogleEvent>(handleLoginUsingGoogle);
@@ -21,7 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LoginWithEmailAndPasswordEvent event,
     Emitter<AuthState> emitter,
   ) async {
-    emitter(LoadingAuthState(user));
+    emitter(state.copyWith(isLoading: true));
 
     var result = await authService.loginUsingEmailAndPassword(
         email: event.email, password: event.password);
@@ -32,7 +32,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void onEmailLoginSuccess(Emitter<AuthState> emitter) {
-    emitter(AuthorizedState(user));
+    emitter(AuthenticatedState(user: user));
   }
 
   void onEmailLoginException(
@@ -44,7 +44,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (loginException is UserNotFoundException) {
       message = "There's no account registered to this email.";
     }
-    emitter(UnauthorizedState(user, message: message));
+    emitter(AuthenticationFailedState(
+      message,
+      isLoading: false,
+    ));
   }
 
   Future<void> handleLogout(
@@ -53,14 +56,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     if (logoutEvent is LogoutEvent) {
       try {
-        emitter(LoadingAuthState(user));
+        emitter(state.copyWith(isLoading: true));
         var result = await authService.logout();
         result.fold(
-          (logoutException) => emitter(AuthorizedState(user)),
-          (r) => emitter(const UnauthorizedState(null)),
+          (logoutException) => emitter(state.copyWith(isLoading: false)),
+          (r) => emitter(AuthInitState()),
         );
       } catch (e) {
-        emitter(AuthorizedState(user));
+        emitter(state.copyWith(isLoading: false));
       }
     }
   }
@@ -69,21 +72,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthEvent loginEvent,
     Emitter<AuthState> emitter,
   ) async {
-    try {
-      emitter(LoadingAuthState(user));
-      var result = await authService.loginUsingGoogle();
-      result.fold(
-        (l) => emitter(const UnauthorizedState(null)),
-        (r) => emitter(AuthorizedState(user)),
-      );
-    } catch (e) {
-      emitter(UnauthorizedState(user));
-    }
+    emitter(state.copyWith(isLoading: true));
+    var result = await authService.loginUsingGoogle();
+    result.fold(
+      (l) => emitter(
+        AuthenticationFailedState(
+          l.message,
+          isLoading: false,
+        ),
+      ),
+      (r) => emitter(AuthenticatedState(
+        user: user,
+      )),
+    );
   }
 
   Future<void> handleSignUp(
       SignUpEvent event, Emitter<AuthState> emitter) async {
-    emitter(LoadingAuthState(user));
+    emitter(state.copyWith(isLoading: true));
     var result = await authService.signUp(event.email, event.password);
     result.fold<void>(
       (exception) => onSignUpFailed(exception, emitter),
@@ -93,10 +99,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void onSignUpSuccess(Emitter<AuthState> emitter) {
     if (user != null) {
-      emitter(AuthorizedState(user));
+      emitter(AuthenticatedState(user: user));
       return;
     }
-    emitter(UnauthorizedState(user));
+    emitter(const AuthenticationFailedState("Unknown Error", isLoading: false));
   }
 
   void onSignUpFailed(AuthException exception, Emitter<AuthState> emitter) {
@@ -112,12 +118,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void onCheckAuthorizationState(
       CheckAuthStateEvent event, Emitter<AuthState> emitter) async {
-    emitter(LoadingAuthState(user));
+    emitter(state.copyWith(isLoading: true));
     await Future.delayed(const Duration(seconds: 1));
     if (user != null) {
-      emitter(AuthorizedState(user));
+      emitter(AuthenticatedState(isLoading: false, user: user));
       return;
     }
-    emitter(UnauthorizedState(user));
+    emitter(UnAuthenticatedState());
   }
 }

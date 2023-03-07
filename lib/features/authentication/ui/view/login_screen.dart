@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
             body: Stack(
               children: [
                 const Padding(padding: EdgeInsets.all(8.0), child: LoginForm()),
-                if (state is LoadingAuthState)
+                if (state.isLoading)
                   const Center(child: CircularProgressIndicator())
               ],
             ),
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void authBlocListener(context, state) {
-    if (state is AuthorizedState) {
+    if (state is AuthenticatedState) {
       RoutePaths.navigateHome(context);
     }
     if (state is UnauthorizedState) {

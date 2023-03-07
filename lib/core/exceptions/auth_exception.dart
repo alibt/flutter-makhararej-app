@@ -1,20 +1,39 @@
 abstract class AuthException implements Exception {
+  final String message;
+
+  AuthException({this.message = "Unknown Exception"});
   @override
   String toString() => "Login Exception";
 }
 
-class UserNotFoundException extends AuthException {}
+class UserNotFoundException extends AuthException {
+  UserNotFoundException();
+}
 
-class InvalidCredentialsException extends AuthException {}
+class InvalidCredentialsException extends AuthException {
+  InvalidCredentialsException();
+}
 
-class UnknownLoginException extends AuthException {}
+class UnknownLoginException extends AuthException {
+  UnknownLoginException();
+}
 
-class GoogleLoginException extends AuthException {}
+class GoogleLoginException extends AuthException {
+  GoogleLoginException();
+}
 
-class LogoutException extends AuthException {}
+class LogoutException extends AuthException {
+  LogoutException();
+}
 
-class WeakPasswordException extends AuthException {}
+class WeakPasswordException extends AuthException {
+  WeakPasswordException();
+}
 
-class EmailAlreadyInUseException extends AuthException {}
+class EmailAlreadyInUseException extends AuthException {
+  EmailAlreadyInUseException();
+}
 
-class UnknownRegisterException extends AuthException {}
+class UnknownRegisterException extends AuthException {
+  UnknownRegisterException();
+}

@@ -29,8 +29,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      if (state is AuthorizedState) RoutePaths.navigateHome(context);
-      if (state is UnauthorizedState) RoutePaths.navigateLoginScreen(context);
+      if (state is AuthenticatedState) RoutePaths.navigateHome(context);
+      if (state is UnAuthenticatedState) {
+        RoutePaths.navigateLoginScreen(context);
+      }
     }, builder: (context, state) {
       return Scaffold(
         body: Center(
@@ -43,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const Text("It is simple to use!"),
               Spaces.VERTICAL_XL,
-              if (state is LoadingAuthState) const CircularProgressIndicator()
+              if (state.isLoading) const CircularProgressIndicator()
             ],
           ),
         ),

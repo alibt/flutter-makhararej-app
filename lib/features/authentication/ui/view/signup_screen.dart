@@ -37,7 +37,7 @@ class SignupScreenState extends State<SignupScreen> {
                     passwordController: _passwordController,
                     confirmPasswordController: _confirmPasswordController),
               ),
-              if (state is LoadingAuthState)
+              if (state.isLoading)
                 const Center(
                   child: CircularProgressIndicator(),
                 )
@@ -55,7 +55,7 @@ class SignupScreenState extends State<SignupScreen> {
       );
       return;
     }
-    if (state is AuthorizedState) {
+    if (state is AuthenticatedState) {
       RoutePaths.navigateHome(context);
     }
   }

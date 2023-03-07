@@ -6,7 +6,6 @@ import 'package:makharej_app/core/utils/widgets/spaces.dart';
 
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
-import '../../bloc/auth_state.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -68,24 +67,27 @@ class _LoginFormState extends State<LoginForm> {
           ),
           Spaces.VERTICAL_M,
           ElevatedButton(
-              onPressed: () =>
-                  onLoginUsingEmailPassword(BlocProvider.of<AuthBloc>(context)),
+              onPressed: () => onLoginUsingEmailPassword(
+                    BlocProvider.of<AuthBloc>(context),
+                  ),
               child: const Text("Login")),
           TextButton(
             onPressed: () => onGoogleLogin(BlocProvider.of<AuthBloc>(context)),
             child: const Text("Sign In Using Google"),
           ),
           TextButton(
-              onPressed: () => onSignUp(BlocProvider.of<AuthBloc>(context)),
-              child: const Text("Don't have an account? SignUp!"))
+            onPressed: () => onSignUp(
+              BlocProvider.of<AuthBloc>(context),
+            ),
+            child: const Text("Don't have an account? SignUp!"),
+          )
         ],
       ),
     );
   }
 
-  //TODO ask Goncalo, is it necessary to move this functionality to bloc?
   void onSignUp(AuthBloc authBloc) {
-    if (authBloc.state is LoadingAuthState) return;
+    if (authBloc.state.isLoading) return;
     RoutePaths.navigateSignUpScreen(context);
   }
 
