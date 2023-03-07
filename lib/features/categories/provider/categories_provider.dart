@@ -3,7 +3,7 @@ import 'package:makharej_app/core/constants/configs.dart';
 import 'package:makharej_app/core/exceptions/network_exceptions.dart';
 import 'package:makharej_app/core/mock_data/mock_categories_list.dart';
 import 'package:makharej_app/features/authentication/provider/auth_provider.dart';
-import 'package:makharej_app/features/categories/models/expence_category.dart';
+import 'package:makharej_app/features/categories/models/makharej_category.dart';
 
 class CategoryProvider {
   final AuthProvider authService;
@@ -14,13 +14,13 @@ class CategoryProvider {
     await Future.delayed(const Duration(seconds: 2));
   }
 
-  Future<Either<List<ExpenseCategory>, Exception>> getCategories() async {
+  Future<Either<List<MakharejCategory>, Exception>> getCategories() async {
     await Future.delayed(const Duration(seconds: 2));
     if (mockCategories) {
       try {
-        var categoriesList = <ExpenseCategory>[];
+        var categoriesList = <MakharejCategory>[];
         for (var category in mockCategoriesList) {
-          categoriesList.add(ExpenseCategory.fromJson(category));
+          categoriesList.add(MakharejCategory.fromJson(category));
         }
         return left(categoriesList);
       } catch (e) {
@@ -33,7 +33,7 @@ class CategoryProvider {
   }
 
   Future<Either<String, Exception>> addCategory(
-      ExpenseCategory category) async {
+      MakharejCategory category) async {
     try {
       //TODO implement add category to DB - BE
 
