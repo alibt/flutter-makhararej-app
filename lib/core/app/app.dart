@@ -1,11 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:makharej_app/core/navigation/route_paths.dart';
 import 'package:makharej_app/core/theming/theme.dart';
-import 'package:makharej_app/features/authentication/provider/auth_provider.dart';
+import 'package:makharej_app/features/authentication/provider/firebase_auth_provider.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_bloc.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_state.dart';
 import 'package:makharej_app/features/categories/provider/categories_provider.dart';
@@ -19,14 +17,13 @@ class MakharejApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<AuthProvider>(
-      create: (_) =>
-          AuthProvider(FirebaseAuth.instanceFor(app: Firebase.app())),
+    return RepositoryProvider<FirebaseAuthProvider>(
+      create: (_) => FirebaseAuthProvider(),
       child: MultiRepositoryProvider(
         providers: [
           RepositoryProvider<CategoryProvider>(
             create: (context) => CategoryProvider(
-              context.read<AuthProvider>(),
+              context.read<FirebaseAuthProvider>(),
             ),
           ),
         ],
@@ -34,7 +31,7 @@ class MakharejApp extends StatelessWidget {
           providers: [
             BlocProvider<AuthBloc>(
                 create: (context) => AuthBloc(
-                      RepositoryProvider.of<AuthProvider>(context),
+                      RepositoryProvider.of<FirebaseAuthProvider>(context),
                     )),
           ],
           child: BlocListener<AuthBloc, AuthState>(
