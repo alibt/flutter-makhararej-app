@@ -3,7 +3,7 @@ import 'package:makharej_app/features/categories/ui/view/categories_tab.dart';
 
 import 'widgets/charts_tab.dart';
 import 'widgets/home_tab.dart';
-import 'widgets/profile_tab.dart';
+import '../../profile/ui/profile_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

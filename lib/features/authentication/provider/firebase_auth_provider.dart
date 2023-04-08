@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
-import 'package:makharej_app/features/profile/model/user.dart';
+import 'package:makharej_app/features/profile/model/makharej_user.dart';
 import 'package:makharej_app/features/profile/provider/user_provider.dart';
 
 import 'base_auth_provider.dart';

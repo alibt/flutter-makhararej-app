@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
 
-import '../../profile/model/user.dart';
+import '../../profile/model/makharej_user.dart';
 
 abstract class BaseAuthProvider {
   Future<Either<AuthException, bool>> loginUsingEmailAndPassword(
