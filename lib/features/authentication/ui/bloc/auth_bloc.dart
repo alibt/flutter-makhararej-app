@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
-import 'package:makharej_app/features/authentication/provider/auth_provider.dart';
+import 'package:makharej_app/features/authentication/provider/firebase_auth_provider.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_event.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_state.dart';
+import 'package:makharej_app/features/profile/model/makharej_user.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthProvider authService;
-  User? get user => authService.getUser();
+  final FirebaseAuthProvider authService;
+  MakharejUser? user;
 
   AuthBloc(this.authService) : super(AuthInitState()) {
     on<LoginWithEmailAndPasswordEvent>(handleSignInUsingEmailAndPassword);
@@ -54,17 +54,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthEvent logoutEvent,
     Emitter<AuthState> emitter,
   ) async {
-    if (logoutEvent is LogoutEvent) {
-      try {
-        emitter(state.copyWith(isLoading: true));
-        var result = await authService.logout();
-        result.fold(
-          (logoutException) => emitter(state.copyWith(isLoading: false)),
-          (r) => emitter(AuthInitState()),
-        );
-      } catch (e) {
-        emitter(state.copyWith(isLoading: false));
-      }
+    try {
+      emitter(state.copyWith(isLoading: true));
+      var result = await authService.logout();
+      result.fold(
+        (logoutException) => emitter(state.copyWith(isLoading: false)),
+        (r) {
+          user = null;
+          emitter(AuthInitState());
+        },
+      );
+    } catch (e) {
+      emitter(state.copyWith(isLoading: false));
     }
   }
 
@@ -88,24 +89,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> handleSignUp(
-      SignUpEvent event, Emitter<AuthState> emitter) async {
-    emitter(state.copyWith(isLoading: true));
+    SignUpEvent event,
+    Emitter<AuthState> emitter,
+  ) async {
+    emitter(
+      state.copyWith(isLoading: true),
+    );
     var result = await authService.signUp(event.email, event.password);
     result.fold<void>(
       (exception) => onSignUpFailed(exception, emitter),
-      (r) => onSignUpSuccess(emitter),
+      (newUser) => onSignUpSuccess(emitter, newUser),
     );
   }
 
-  void onSignUpSuccess(Emitter<AuthState> emitter) {
-    if (user != null) {
-      emitter(AuthenticatedState(user: user));
-      return;
-    }
-    emitter(const AuthenticationFailedState("Unknown Error", isLoading: false));
+  void onSignUpSuccess(
+    Emitter<AuthState> emitter,
+    MakharejUser newUser,
+  ) {
+    user = newUser;
+    emitter(RegistrationSuccess(user!));
   }
 
-  void onSignUpFailed(AuthException exception, Emitter<AuthState> emitter) {
+  void onSignUpFailed(
+    AuthException exception,
+    Emitter<AuthState> emitter,
+  ) {
     var message = "Unknown Error";
     if (exception is WeakPasswordException) {
       message = "Password is weak!";

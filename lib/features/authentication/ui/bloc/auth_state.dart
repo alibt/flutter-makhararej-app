@@ -1,11 +1,10 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:makharej_app/features/profile/model/makharej_user.dart';
 
 @immutable
 class AuthState extends Equatable {
-  final User? user;
+  final MakharejUser? user;
   final bool isLoading;
 
   const AuthState({
@@ -19,7 +18,7 @@ class AuthState extends Equatable {
       ];
 
   AuthState copyWith({
-    User? user,
+    MakharejUser? user,
     bool? isLoading,
   }) {
     return AuthState(
@@ -53,6 +52,10 @@ class AuthenticatedState extends AuthState {
     super.user,
     super.isLoading = false,
   });
+}
+
+class RegistrationSuccess extends AuthState {
+  const RegistrationSuccess(MakharejUser user) : super(user: user);
 }
 
 class RegisterationFailedState extends AuthState {
