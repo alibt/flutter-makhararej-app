@@ -55,7 +55,7 @@ class SignupScreenState extends State<SignupScreen> {
       );
       return;
     }
-    if (state is AuthenticatedState) {
+    if (state is RegistrationSuccess) {
       RoutePaths.navigateHome();
     }
   }
