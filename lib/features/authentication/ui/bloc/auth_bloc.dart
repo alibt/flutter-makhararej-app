@@ -95,7 +95,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emitter(
       state.copyWith(isLoading: true),
     );
-    var result = await authService.signUp(event.email, event.password);
+    var result =
+        await authService.signUp(email: event.email, password: event.password);
     result.fold<void>(
       (exception) => onSignUpFailed(exception, emitter),
       (newUser) => onSignUpSuccess(emitter, newUser),

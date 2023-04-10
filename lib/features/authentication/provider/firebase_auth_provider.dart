@@ -2,13 +2,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
+import 'package:makharej_app/core/utils/extensions/string_extension.dart';
 import 'package:makharej_app/features/profile/model/makharej_user.dart';
 import 'package:makharej_app/features/profile/provider/user_provider.dart';
 
 import 'base_auth_provider.dart';
 
+//TODO (test) is the input correctly being sent to firebase auth,
+//TODO (test) different types of responses and exceptions
+//TODO what can go wrong?
+
 const wrongPasswordFirebaseExceptionCode = "wrong-password";
 const userNotFoundFirebaseExceptionCode = "user-not-found";
+const noAccessToFirebaseServiceCode = "network-request-failed";
+const invalidEmailCode = "invalid-email";
+const weakPasswordCode = 'weak-password';
+const emailAlreadyInUseCode = 'email-already-in-use';
 
 class FirebaseAuthProvider extends BaseAuthProvider {
   final FirebaseAuth _firebaseAuth;
@@ -22,11 +31,7 @@ class FirebaseAuthProvider extends BaseAuthProvider {
     UserProvider? userProvider,
   })  : _googleSignIn = googleSignIn ?? GoogleSignIn(),
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _userProvider = UserProvider();
-
-//TODO (test) is the input correctly being sent to firebase auth,
-//TODO (test) different types of responses and exceptions
-//TODO what can go wrong?
+        _userProvider = userProvider ?? UserProvider();
 
   @override
   Future<Either<AuthException, bool>> loginUsingEmailAndPassword({
@@ -36,16 +41,25 @@ class FirebaseAuthProvider extends BaseAuthProvider {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      return Either.right(true);
+      return right(true);
     } on FirebaseAuthException catch (e) {
       if (e.code == userNotFoundFirebaseExceptionCode) {
-        return Either.left(UserNotFoundException());
-      } else if (e.code == wrongPasswordFirebaseExceptionCode) {
-        return Either.left(InvalidCredentialsException());
+        return left(UserNotFoundException());
       }
-      return Either.left(UnknownLoginException());
+      if (e.code == wrongPasswordFirebaseExceptionCode) {
+        return left(InvalidCredentialsException());
+      }
+      if (e.code == invalidEmailCode) {
+        return left(InvalidCredentialsException());
+      }
+      return left(UnknownLoginException());
+    } on FirebaseException catch (e) {
+      if (e.code == noAccessToFirebaseServiceCode) {
+        return left(NoAccessToFireBaseServer());
+      }
+      return left(UnknownLoginException());
     } catch (e) {
-      return Either.left(UnknownLoginException());
+      return left(UnknownLoginException());
     }
   }
 
@@ -86,11 +100,19 @@ class FirebaseAuthProvider extends BaseAuthProvider {
   }
 
   @override
-  Future<Either<AuthException, MakharejUser>> signUp(
-      String email, String password) async {
+  Future<Either<AuthException, MakharejUser>> signUp({
+    required String email,
+    required String password,
+  }) async {
     try {
+      if (!email.isEmail()) {
+        return left(InvalidEmailException());
+      }
+      if (!password.isStrongPassword()) {
+        return left(WeakPasswordException());
+      }
       UserCredential userCredentials =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -111,10 +133,10 @@ class FirebaseAuthProvider extends BaseAuthProvider {
       }
       return left(UnknownRegisterException());
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
+      if (e.code == weakPasswordCode) {
         return left(WeakPasswordException());
-      } else if (e.code == 'email-already-in-use') {
-        return Left(EmailAlreadyInUseException());
+      } else if (e.code == emailAlreadyInUseCode) {
+        return left(EmailAlreadyInUseException());
       }
       return left(UnknownRegisterException());
     } catch (e) {

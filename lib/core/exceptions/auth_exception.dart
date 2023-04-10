@@ -34,6 +34,16 @@ class EmailAlreadyInUseException extends AuthException {
   EmailAlreadyInUseException();
 }
 
+class InvalidEmailException extends AuthException {
+  InvalidEmailException();
+}
+
 class UnknownRegisterException extends AuthException {
   UnknownRegisterException();
+}
+
+class NoAccessToFireBaseServer extends AuthException {
+  NoAccessToFireBaseServer();
+  @override
+  String toString() => "Network Error or Server Unavailable";
 }

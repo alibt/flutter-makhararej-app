@@ -5,6 +5,12 @@ extension Validators on String {
         .hasMatch(this);
   }
 
+  bool isStrongPassword() {
+    final regex =
+        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%\^&\*])(?=.{8,})');
+    return regex.hasMatch(this);
+  }
+
   String? emailValidator() {
     if ((isEmpty)) {
       return 'Please enter your email';
