@@ -1,20 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:makharej_app/core/constants/configs.dart';
-import 'package:makharej_app/core/exceptions/network_exceptions.dart';
+import 'package:makharej_app/core/constants/firestore_collections_names.dart';
 import 'package:makharej_app/core/mock_data/mock_categories_list.dart';
-import 'package:makharej_app/features/authentication/provider/auth_provider.dart';
+import 'package:makharej_app/features/authentication/provider/firebase_auth_provider.dart';
 import 'package:makharej_app/features/categories/models/makharej_category.dart';
 
 class CategoryProvider {
-  final AuthProvider authService;
+  final FirebaseAuthProvider authService;
 
   CategoryProvider(this.authService);
 
-  Future<void> waitTwoSeconds() async {
-    await Future.delayed(const Duration(seconds: 2));
-  }
-
-  Future<Either<List<MakharejCategory>, Exception>> getCategories() async {
+  Future<Either<List<MakharejCategory>, Exception>> getCategories(
+      String familyID) async {
     await Future.delayed(const Duration(seconds: 2));
     if (mockCategories) {
       try {
@@ -23,23 +21,46 @@ class CategoryProvider {
           categoriesList.add(MakharejCategory.fromJson(category));
         }
         return left(categoriesList);
-      } catch (e) {
-        return right(ConnectionException());
+      } on Exception catch (e) {
+        return right(e);
       }
-    } else {
-      //TODO implement fetching categories from BE
-      throw UnimplementedError();
+    }
+    try {
+      final db = FirebaseFirestore.instance;
+      final categoriesList = <MakharejCategory>[];
+      await db
+          .collection(
+            CollectionNames.getCategoriesPath(familyID),
+          )
+          .get()
+          .then(
+        (categories) {
+          for (var catDoc in categories.docs) {
+            final categoryObj = MakharejCategory.fromJson(catDoc.data());
+            categoryObj.id = catDoc.id;
+            categoriesList.add(categoryObj);
+          }
+        },
+      );
+      return left(categoriesList);
+    } on Exception catch (e) {
+      return right(e);
     }
   }
 
   Future<Either<String, Exception>> addCategory(
       MakharejCategory category) async {
     try {
-      //TODO implement add category to DB - BE
+      final db = FirebaseFirestore.instance;
+      final _ = await db.collection(CollectionNames.categories).add(
+            category.toJson(),
+          );
 
-      throw UnimplementedError();
-    } catch (e) {
-      return right(ConnectionException());
+      return left("category successfully added");
+    } on FirebaseException catch (e) {
+      return right(e);
+    } on Exception catch (e) {
+      return right(e);
     }
   }
 }

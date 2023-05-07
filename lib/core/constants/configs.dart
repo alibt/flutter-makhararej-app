@@ -1,1 +1,1 @@
-const mockCategories = true;
+const mockCategories = false;
