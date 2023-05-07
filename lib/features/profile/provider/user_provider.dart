@@ -8,11 +8,14 @@ class UserProvider {
   Future<Either<Exception, MakharejUser>> getUser(String uid) async {
     try {
       final db = FirebaseFirestore.instance;
-      late MakharejUser user;
-      await db.collection(CollectionNames.getUserPath(uid)).get().then((value) {
-        user = MakharejUser.fromJson(value.docs.first.data());
+      MakharejUser? user;
+      await db.collection(CollectionNames.users).doc(uid).get().then((value) {
+        if (value.data() != null) user = MakharejUser.fromJson(value.data()!);
       });
-      return right(user);
+      if (user != null) return right(user!);
+      throw Exception();
+    } on FirebaseException catch (e) {
+      return left(e);
     } on Exception catch (e) {
       return left(e);
     }
