@@ -128,7 +128,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   void onCheckAuthorizationState(
       CheckAuthStateEvent event, Emitter<AuthState> emitter) async {
     emitter(state.copyWith(isLoading: true));
-    await Future.delayed(const Duration(seconds: 1));
+
+    user = await authService.getUser();
     if (user != null) {
       emitter(AuthenticatedState(isLoading: false, user: user));
       return;
