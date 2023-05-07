@@ -9,6 +9,8 @@ abstract class BaseAuthProvider {
     required String password,
   });
 
+  Future<MakharejUser?> getUser();
+
   Future<Either<AuthException, MakharejUser>> loginUsingGoogle();
   Future<Either<LogoutException, bool>> logout();
   Future<Either<AuthException, MakharejUser>> signUp({

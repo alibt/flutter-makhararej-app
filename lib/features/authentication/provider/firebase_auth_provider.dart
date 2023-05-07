@@ -8,10 +8,6 @@ import 'package:makharej_app/features/profile/provider/user_provider.dart';
 
 import 'base_auth_provider.dart';
 
-//TODO (test) is the input correctly being sent to firebase auth,
-//TODO (test) different types of responses and exceptions
-//TODO what can go wrong?
-
 const wrongPasswordFirebaseExceptionCode = "wrong-password";
 const userNotFoundFirebaseExceptionCode = "user-not-found";
 const noAccessToFirebaseServiceCode = "network-request-failed";
@@ -34,6 +30,22 @@ class FirebaseAuthProvider extends BaseAuthProvider {
         _userProvider = userProvider ?? UserProvider();
 
   @override
+  Future<MakharejUser?> getUser() async {
+    if (user != null) return user;
+    var fireBaseUser = _firebaseAuth.currentUser;
+    if (fireBaseUser != null) {
+      var makharejUserResult = await _userProvider.getUser(fireBaseUser.uid);
+      makharejUserResult.fold(
+        (exception) => null,
+        (newUser) {
+          user = newUser;
+        },
+      );
+    }
+    return user;
+  }
+
+  @override
   Future<Either<AuthException, bool>> loginUsingEmailAndPassword({
     required String email,
     required String password,
@@ -43,44 +55,46 @@ class FirebaseAuthProvider extends BaseAuthProvider {
           email: email, password: password);
       return right(true);
     } on FirebaseAuthException catch (e) {
-      if (e.code == userNotFoundFirebaseExceptionCode) {
-        return left(UserNotFoundException());
-      }
-      if (e.code == wrongPasswordFirebaseExceptionCode) {
+      if (e.code == userNotFoundFirebaseExceptionCode ||
+          e.code == wrongPasswordFirebaseExceptionCode ||
+          e.code == invalidEmailCode) {
         return left(InvalidCredentialsException());
       }
-      if (e.code == invalidEmailCode) {
-        return left(InvalidCredentialsException());
-      }
+
       return left(UnknownLoginException());
     } on FirebaseException catch (e) {
       if (e.code == noAccessToFirebaseServiceCode) {
         return left(NoAccessToFireBaseServer());
       }
+
       return left(UnknownLoginException());
     } catch (e) {
       return left(UnknownLoginException());
     }
   }
 
+  //TODO(Ali) take register user in DB to a cloud function and trigger it
+  //on firebase auth sign up event
+
   @override
   Future<Either<AuthException, MakharejUser>> loginUsingGoogle() async {
     try {
       final googleAccount = await _googleSignIn.signIn();
       final googleAuth = await googleAccount?.authentication;
-      //TODO register user after registering google
-      if (googleAuth != null) {
-        final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-        var userCredentials =
-            await _firebaseAuth.signInWithCredential(credential);
-        //this line is temp
-        var makharejUser = MakharejUser(
-            email: userCredentials.user?.email ?? "",
-            userID: userCredentials.user?.uid ?? "");
-        return right(makharejUser);
+      if (googleAuth == null) return left(GoogleLoginException());
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      var userCredentials =
+          await _firebaseAuth.signInWithCredential(credential);
+      if (userCredentials.user == null) return left(GoogleLoginException());
+
+      Either<Exception, MakharejUser> registerationResult =
+          await registerUserInDB(userCredentials);
+      if (registerationResult.isRight()) {
+        return right(user!);
       } else {
         return left(GoogleLoginException());
       }
@@ -93,6 +107,7 @@ class FirebaseAuthProvider extends BaseAuthProvider {
   Future<Either<LogoutException, bool>> logout() async {
     try {
       await _firebaseAuth.signOut();
+      user = null;
       return right(true);
     } catch (e) {
       return left(LogoutException());
@@ -108,39 +123,53 @@ class FirebaseAuthProvider extends BaseAuthProvider {
       if (!email.isEmail()) {
         return left(InvalidEmailException());
       }
+
       if (!password.isStrongPassword()) {
         return left(WeakPasswordException());
       }
-      UserCredential userCredentials =
+
+      final userCredentials =
           await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
       if (userCredentials.user != null) {
-        var registerationResult =
-            await _userProvider.registerNewUser(userCredentials.user!);
-        registerationResult.fold(
-          (exception) {
-            throw exception;
-          },
-          (registeredUser) {
-            user = registeredUser;
-          },
-        );
+        Either<Exception, MakharejUser> registerationResult =
+            await registerUserInDB(userCredentials);
         if (registerationResult.isRight()) {
           return right(user!);
         }
       }
+
       return left(UnknownRegisterException());
     } on FirebaseAuthException catch (e) {
       if (e.code == weakPasswordCode) {
         return left(WeakPasswordException());
-      } else if (e.code == emailAlreadyInUseCode) {
+      }
+
+      if (e.code == emailAlreadyInUseCode) {
         return left(EmailAlreadyInUseException());
       }
+
       return left(UnknownRegisterException());
     } catch (e) {
       return left(UnknownRegisterException());
     }
+  }
+
+  Future<Either<Exception, MakharejUser>> registerUserInDB(
+      UserCredential userCredentials) async {
+    final registerationResult =
+        await _userProvider.registerNewUser(userCredentials.user!);
+    registerationResult.fold(
+      (exception) {
+        throw exception;
+      },
+      (registeredUser) {
+        user = registeredUser;
+      },
+    );
+    return registerationResult;
   }
 }
