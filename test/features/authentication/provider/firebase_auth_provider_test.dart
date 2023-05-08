@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
 import 'package:makharej_app/features/authentication/provider/firebase_auth_provider.dart';
 import 'package:makharej_app/features/profile/model/makharej_user.dart';
@@ -23,16 +24,19 @@ void main() {
   const invalidEmail2 = "a@a.";
   const weakPassword1 = "11111111";
   const weakPassword2 = "1111111a";
+  const customErrorCode = "customErrorCodeForTest";
 
   late MockFirebaseAuth mockFirebaseAuth;
   late FirebaseAuthProvider firebaseAuthProvider;
   late MockUserProvider mockUserProvider;
+  late MockGoogleSignIn mockGoogleSignIn;
   group(
     "login with username and password",
     () {
       setUp(
         () {
           mockFirebaseAuth = MockFirebaseAuth();
+
           firebaseAuthProvider = FirebaseAuthProvider(
             firebaseAuth: mockFirebaseAuth,
           );
@@ -45,11 +49,10 @@ void main() {
       test(
         "verify username and password is passed to firebaseAuth",
         () async {
-          whenCalling(Invocation.method(#signInWithEmailAndPassword, null, {
-            #email: email,
-            #password: password
-          })).on(mockFirebaseAuth).thenThrow(
-              FirebaseAuthException(code: userNotFoundFirebaseExceptionCode));
+          whenCalling(Invocation.method(#signInWithEmailAndPassword, null,
+                  {#email: email, #password: password}))
+              .on(mockFirebaseAuth)
+              .thenThrow(FirebaseAuthException(code: customErrorCode));
 
           var result = await firebaseAuthProvider.loginUsingEmailAndPassword(
               email: email, password: password);
@@ -58,7 +61,9 @@ void main() {
 
           result.fold(
             (exception) {
-              expect(exception is UserNotFoundException, true);
+              expect(exception is UnknownLoginException, true);
+              expect(
+                  (exception as UnknownLoginException).code, customErrorCode);
             },
             (flag) => null,
           );
@@ -194,6 +199,7 @@ void main() {
         });
         var result =
             await firebaseAuthProvider.signUp(email: email, password: password);
+        verify(mockUserProvider.registerNewUser(any));
         expect(result.isRight(), true);
         result.fold(
           (l) => null,
@@ -282,5 +288,66 @@ void main() {
       });
     },
   );
-  group("login using google", () {});
+
+  group("login using google", () {
+    setUp(
+      () {
+        mockFirebaseAuth = MockFirebaseAuth();
+        mockGoogleSignIn = MockGoogleSignIn();
+        mockUserProvider = MockUserProvider();
+        when(mockUserProvider.registerNewUser(any))
+            .thenAnswer((realInvocation) async {
+          return right(
+            MakharejUser(email: email, userID: "userId"),
+          );
+        });
+        firebaseAuthProvider = FirebaseAuthProvider(
+            firebaseAuth: mockFirebaseAuth,
+            googleSignIn: mockGoogleSignIn,
+            userProvider: mockUserProvider);
+      },
+    );
+    tearDown(
+      () {},
+    );
+    test("succuss login with google account and success registration",
+        () async {
+      var result = await firebaseAuthProvider.loginUsingGoogle();
+      expect(result.isRight(), true);
+      result.fold(
+        (exception) {},
+        (user) {
+          expect(user.email, email);
+        },
+      );
+      verify(mockUserProvider.registerNewUser(any));
+    });
+    test("failed to login using google account", () async {
+      mockGoogleSignIn.setIsCancelled(true);
+      var result = await firebaseAuthProvider.loginUsingGoogle();
+      expect(result.isLeft(), true);
+      result.fold(
+        (exception) {
+          expect(exception is GoogleLoginException, true);
+        },
+        (user) => null,
+      );
+      verify(mockUserProvider.registerNewUser(any));
+    });
+    test("failed to register user during google sign in", () async {
+      mockGoogleSignIn.setIsCancelled(false);
+      when(mockUserProvider.registerNewUser(any)).thenAnswer(
+        (realInvocation) async => left(Exception()),
+      );
+      var result = await firebaseAuthProvider.loginUsingGoogle();
+      expect(result.isLeft(), true);
+      result.fold(
+        (exception) {
+          expect(exception is GoogleLoginException, true);
+        },
+        (user) => null,
+      );
+      verify(mockUserProvider.registerNewUser(any));
+    });
+  });
 }

@@ -15,7 +15,8 @@ class InvalidCredentialsException extends AuthException {
 }
 
 class UnknownLoginException extends AuthException {
-  UnknownLoginException();
+  String? code;
+  UnknownLoginException({this.code});
 }
 
 class GoogleLoginException extends AuthException {

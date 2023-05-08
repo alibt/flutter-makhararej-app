@@ -55,19 +55,25 @@ class FirebaseAuthProvider extends BaseAuthProvider {
           email: email, password: password);
       return right(true);
     } on FirebaseAuthException catch (e) {
-      if (e.code == userNotFoundFirebaseExceptionCode ||
-          e.code == wrongPasswordFirebaseExceptionCode ||
-          e.code == invalidEmailCode) {
+      if (e.code == userNotFoundFirebaseExceptionCode) {
+        return left(UserNotFoundException());
+      }
+
+      if (e.code == wrongPasswordFirebaseExceptionCode) {
         return left(InvalidCredentialsException());
       }
 
-      return left(UnknownLoginException());
+      if (e.code == invalidEmailCode) {
+        return left(InvalidCredentialsException());
+      }
+
+      return left(UnknownLoginException(code: e.code));
     } on FirebaseException catch (e) {
       if (e.code == noAccessToFirebaseServiceCode) {
         return left(NoAccessToFireBaseServer());
       }
 
-      return left(UnknownLoginException());
+      return left(UnknownLoginException(code: e.code));
     } catch (e) {
       return left(UnknownLoginException());
     }
