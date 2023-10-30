@@ -14,6 +14,7 @@ const noAccessToFirebaseServiceCode = "network-request-failed";
 const invalidEmailCode = "invalid-email";
 const weakPasswordCode = 'weak-password';
 const emailAlreadyInUseCode = 'email-already-in-use';
+const permissionDeniedCode = 'permission-denied';
 
 class FirebaseAuthProvider extends BaseAuthProvider {
   final FirebaseAuth _firebaseAuth;
@@ -69,8 +70,8 @@ class FirebaseAuthProvider extends BaseAuthProvider {
 
       return left(UnknownLoginException(code: e.code));
     } on FirebaseException catch (e) {
-      if (e.code == noAccessToFirebaseServiceCode) {
-        return left(NoAccessToFireBaseServer());
+      if (e.code == permissionDeniedCode) {
+        return left((PermissionDeniedException()));
       }
 
       return left(UnknownLoginException(code: e.code));
@@ -156,6 +157,12 @@ class FirebaseAuthProvider extends BaseAuthProvider {
 
       if (e.code == emailAlreadyInUseCode) {
         return left(EmailAlreadyInUseException());
+      }
+
+      return left(UnknownRegisterException());
+    } on FirebaseException catch (e) {
+      if (e.code == permissionDeniedCode) {
+        return left((PermissionDeniedException()));
       }
 
       return left(UnknownRegisterException());

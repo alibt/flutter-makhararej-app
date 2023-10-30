@@ -39,6 +39,12 @@ class InvalidEmailException extends AuthException {
   InvalidEmailException();
 }
 
+class PermissionDeniedException extends AuthException {
+  PermissionDeniedException();
+  @override
+  String toString() => "Permission Denied";
+}
+
 class UnknownRegisterException extends AuthException {
   UnknownRegisterException();
 }

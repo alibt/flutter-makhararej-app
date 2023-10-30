@@ -122,6 +122,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (exception is EmailAlreadyInUseException) {
       message = "An account is registered to this email";
     }
+    if (exception is PermissionDeniedException) {
+      message = "Permission Denied!";
+    }
     emitter(RegisterationFailedState(message));
   }
 
