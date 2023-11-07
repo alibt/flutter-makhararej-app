@@ -18,7 +18,9 @@ class CategoryProvider {
       try {
         var categoriesList = <MakharejCategory>[];
         for (var category in mockCategoriesList) {
-          categoriesList.add(MakharejCategory.fromJson(category));
+          categoriesList.add(
+            MakharejCategory.fromJson(category),
+          );
         }
         return left(categoriesList);
       } on Exception catch (e) {

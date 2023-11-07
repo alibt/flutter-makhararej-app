@@ -1,17 +1,22 @@
 class MakharejCategory {
-  String id;
-  String title;
-  double? currentTotalValue;
-  double? monthlyTotalValuePrediction;
-  String? color;
-  String? iconName;
-  bool isIncome;
+  late String id;
+  final String title;
+  final double? currentTotalValue;
+  final double? monthlyTotalValuePrediction;
+  final String? color;
+  final String? iconName;
+  final bool isIncome;
+  final String familyID;
+  final String createdBy;
+
   bool get isExpense => !isIncome;
 
   MakharejCategory(
       {required this.title,
       required this.id,
       required this.isIncome,
+      required this.familyID,
+      required this.createdBy,
       this.currentTotalValue,
       this.monthlyTotalValuePrediction,
       this.color,
@@ -21,12 +26,13 @@ class MakharejCategory {
   MakharejCategory.fromJson(Map<String, dynamic> json)
       : title = json['title'],
         id = json['id'],
-        isIncome = json['isIncome'] {
-    currentTotalValue = json['currentTotalValue'];
-    monthlyTotalValuePrediction = json['monthlyTotalValuePrediction'];
-    color = json['color'];
-    iconName = json['iconName'];
-  }
+        createdBy = json['createdBy'],
+        familyID = json['familyID'],
+        isIncome = json['isIncome'],
+        currentTotalValue = json['currentTotalValue'],
+        monthlyTotalValuePrediction = json['monthlyTotalValuePrediction'],
+        color = json['color'],
+        iconName = json['iconName'];
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};

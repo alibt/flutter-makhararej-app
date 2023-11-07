@@ -6,6 +6,8 @@ class MakharejTransaction {
   final DateTime createdTime;
   final double value;
   final String description;
+  final String familyID;
+  final String createdBy;
 
   MakharejTransaction({
     required this.id,
@@ -15,6 +17,8 @@ class MakharejTransaction {
     required this.createdTime,
     required this.value,
     required this.description,
+    required this.familyID,
+    required this.createdBy,
   });
 
   factory MakharejTransaction.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class MakharejTransaction {
       createdTime: DateTime.parse(json['createdTime'] as String),
       value: (json['value'] as num).toDouble(),
       description: json['description'] as String,
+      familyID: json['familyID'] as String,
+      createdBy: json['createdBy'] as String,
     );
   }
 
@@ -38,6 +44,7 @@ class MakharejTransaction {
       'createdTime': createdTime.toIso8601String(),
       'value': value,
       'description': description,
+      'familyID': familyID,
     };
   }
 }
