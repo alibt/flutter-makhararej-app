@@ -47,14 +47,14 @@ class FirebaseAuthProvider extends BaseAuthProvider {
   }
 
   @override
-  Future<Either<AuthException, bool>> loginUsingEmailAndPassword({
+  Future<Either<AuthException, String>> loginUsingEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      await _firebaseAuth.signInWithEmailAndPassword(
+      final loginResponse = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      return right(true);
+      return right(loginResponse.user!.uid);
     } on FirebaseAuthException catch (e) {
       if (e.code == userNotFoundFirebaseExceptionCode) {
         return left(UserNotFoundException());
@@ -80,11 +80,8 @@ class FirebaseAuthProvider extends BaseAuthProvider {
     }
   }
 
-  //TODO(Ali) take register user in DB to a cloud function and trigger it
-  //on firebase auth sign up event
-
   @override
-  Future<Either<AuthException, MakharejUser>> loginUsingGoogle() async {
+  Future<Either<AuthException, String>> loginUsingGoogle() async {
     try {
       final googleAccount = await _googleSignIn.signIn();
       final googleAuth = await googleAccount?.authentication;
@@ -96,12 +93,12 @@ class FirebaseAuthProvider extends BaseAuthProvider {
       );
       var userCredentials =
           await _firebaseAuth.signInWithCredential(credential);
-      if (userCredentials.user == null) return left(GoogleLoginException());
+      if (userCredentials.user?.uid == null) {
+        return left(GoogleLoginException());
+      }
 
-      Either<Exception, MakharejUser> registerationResult =
-          await registerUserInDB(userCredentials);
-      if (registerationResult.isRight()) {
-        return right(user!);
+      if (userCredentials.user?.uid != null) {
+        return right(userCredentials.user!.uid);
       } else {
         return left(GoogleLoginException());
       }
@@ -122,7 +119,7 @@ class FirebaseAuthProvider extends BaseAuthProvider {
   }
 
   @override
-  Future<Either<AuthException, MakharejUser>> signUp({
+  Future<Either<AuthException, String>> signUp({
     required String email,
     required String password,
   }) async {
@@ -141,12 +138,8 @@ class FirebaseAuthProvider extends BaseAuthProvider {
         password: password,
       );
 
-      if (userCredentials.user != null) {
-        Either<Exception, MakharejUser> registerationResult =
-            await registerUserInDB(userCredentials);
-        if (registerationResult.isRight()) {
-          return right(user!);
-        }
+      if (userCredentials.user?.uid != null) {
+        return right(userCredentials.user!.uid);
       }
 
       return left(UnknownRegisterException());
@@ -169,20 +162,5 @@ class FirebaseAuthProvider extends BaseAuthProvider {
     } catch (e) {
       return left(UnknownRegisterException());
     }
-  }
-
-  Future<Either<Exception, MakharejUser>> registerUserInDB(
-      UserCredential userCredentials) async {
-    final registerationResult =
-        await _userProvider.registerNewUser(userCredentials.user!);
-    registerationResult.fold(
-      (exception) {
-        throw exception;
-      },
-      (registeredUser) {
-        user = registeredUser;
-      },
-    );
-    return registerationResult;
   }
 }
