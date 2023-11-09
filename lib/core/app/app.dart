@@ -7,6 +7,7 @@ import 'package:makharej_app/features/authentication/provider/firebase_auth_prov
 import 'package:makharej_app/features/authentication/ui/bloc/auth_bloc.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_state.dart';
 import 'package:makharej_app/features/categories/provider/categories_provider.dart';
+import 'package:makharej_app/features/family/provider/family_provider.dart';
 import 'package:makharej_app/features/splash_screen/ui/splash_screen.dart';
 import 'package:makharej_app/core/navigation/router.dart' as router;
 
@@ -23,6 +24,11 @@ class MakharejApp extends StatelessWidget {
         providers: [
           RepositoryProvider<CategoryProvider>(
             create: (context) => CategoryProvider(
+              context.read<FirebaseAuthProvider>(),
+            ),
+          ),
+          RepositoryProvider<FamilyProvider>(
+            create: (context) => FamilyProvider(
               context.read<FirebaseAuthProvider>(),
             ),
           ),
