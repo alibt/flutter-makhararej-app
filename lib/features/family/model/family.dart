@@ -1,4 +1,4 @@
-import 'makharej_user.dart';
+import '../../profile/model/makharej_user.dart';
 
 class Family {
   List<MakharejUser> users;
