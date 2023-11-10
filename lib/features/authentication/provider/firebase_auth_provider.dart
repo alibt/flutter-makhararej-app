@@ -30,6 +30,8 @@ class FirebaseAuthProvider extends BaseAuthProvider {
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _userProvider = userProvider ?? UserProvider();
 
+//TODO take get user to user provider and remove it from here
+//Update this function so it only returns a value from
   @override
   Future<MakharejUser?> getUser() async {
     if (user != null) return user;
@@ -47,14 +49,15 @@ class FirebaseAuthProvider extends BaseAuthProvider {
   }
 
   @override
-  Future<Either<AuthException, String>> loginUsingEmailAndPassword({
+  Future<Either<AuthException, User>> loginUsingEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
       final loginResponse = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      return right(loginResponse.user!.uid);
+      if (loginResponse.user == null) return left(UnknownLoginException());
+      return right(loginResponse.user!);
     } on FirebaseAuthException catch (e) {
       if (e.code == userNotFoundFirebaseExceptionCode) {
         return left(UserNotFoundException());
@@ -81,7 +84,7 @@ class FirebaseAuthProvider extends BaseAuthProvider {
   }
 
   @override
-  Future<Either<AuthException, String>> loginUsingGoogle() async {
+  Future<Either<AuthException, User>> loginUsingGoogle() async {
     try {
       final googleAccount = await _googleSignIn.signIn();
       final googleAuth = await googleAccount?.authentication;
@@ -93,15 +96,11 @@ class FirebaseAuthProvider extends BaseAuthProvider {
       );
       var userCredentials =
           await _firebaseAuth.signInWithCredential(credential);
-      if (userCredentials.user?.uid == null) {
+      if (userCredentials.user == null) {
         return left(GoogleLoginException());
       }
 
-      if (userCredentials.user?.uid != null) {
-        return right(userCredentials.user!.uid);
-      } else {
-        return left(GoogleLoginException());
-      }
+      return right(userCredentials.user!);
     } catch (e) {
       return left(GoogleLoginException());
     }
@@ -119,7 +118,7 @@ class FirebaseAuthProvider extends BaseAuthProvider {
   }
 
   @override
-  Future<Either<AuthException, String>> signUp({
+  Future<Either<AuthException, User>> signUp({
     required String email,
     required String password,
   }) async {
@@ -138,8 +137,8 @@ class FirebaseAuthProvider extends BaseAuthProvider {
         password: password,
       );
 
-      if (userCredentials.user?.uid != null) {
-        return right(userCredentials.user!.uid);
+      if (userCredentials.user != null) {
+        return right(userCredentials.user!);
       }
 
       return left(UnknownRegisterException());

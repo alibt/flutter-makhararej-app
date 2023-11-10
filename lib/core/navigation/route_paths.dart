@@ -4,7 +4,7 @@ class RoutePaths {
   static const String homeScreen = "homeScreen";
   static const String loginScreen = "loginScreen";
   static const String signUpScreen = "signUpScreen";
-
+  static const String familyScreen = "familyScreen";
   static void navigateHome() {
     navigatorKey.currentState?.pushReplacementNamed(homeScreen);
   }
@@ -15,5 +15,9 @@ class RoutePaths {
 
   static void navigateSignUpScreen() {
     navigatorKey.currentState?.pushNamed(signUpScreen);
+  }
+
+  static void navigateFamilyScreen() {
+    navigatorKey.currentState?.pushNamed(familyScreen);
   }
 }

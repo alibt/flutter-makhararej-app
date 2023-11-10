@@ -1,15 +1,18 @@
 import 'package:bloc/bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
 import 'package:makharej_app/features/authentication/provider/firebase_auth_provider.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_event.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_state.dart';
 import 'package:makharej_app/features/profile/model/makharej_user.dart';
+import 'package:makharej_app/features/profile/provider/user_provider.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseAuthProvider authService;
+  final UserProvider userProvider;
   MakharejUser? user;
 
-  AuthBloc(this.authService) : super(AuthInitState()) {
+  AuthBloc(this.authService, this.userProvider) : super(AuthInitState()) {
     on<LoginWithEmailAndPasswordEvent>(handleSignInUsingEmailAndPassword);
     on<LogoutEvent>(handleLogout);
     on<LoginWithGoogleEvent>(handleLoginUsingGoogle);
@@ -27,12 +30,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email, password: event.password);
     result.fold<void>(
       (exception) => onEmailLoginException(exception, emitter),
-      (success) => onEmailLoginSuccess(emitter),
+      (firebaseUser) => onLoginSuccess(emitter, firebaseUser),
     );
   }
 
-  void onEmailLoginSuccess(Emitter<AuthState> emitter) {
-    emitter(AuthenticatedState(user: user));
+  void onLoginSuccess(Emitter<AuthState> emitter, User firebaseUser) async {
+    var response = await userProvider.getUser(firebaseUser.uid);
+    response.fold(
+      (exception) {
+        emitter(AuthenticationFailedState(exception.toString()));
+      },
+      (makharejUser) {
+        user = makharejUser;
+        emitter(AuthenticatedState(user: user));
+      },
+    );
   }
 
   void onEmailLoginException(
@@ -82,9 +94,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           isLoading: false,
         ),
       ),
-      (r) => emitter(AuthenticatedState(
-        user: user,
-      )),
+      (firebaseUser) => onLoginSuccess(
+        emitter,
+        firebaseUser,
+      ),
     );
   }
 
@@ -99,16 +112,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await authService.signUp(email: event.email, password: event.password);
     result.fold<void>(
       (exception) => onSignUpFailed(exception, emitter),
-      (newUser) => onSignUpSuccess(emitter, newUser),
+      (user) => onSignUpSuccess(emitter, user),
     );
   }
 
   void onSignUpSuccess(
     Emitter<AuthState> emitter,
-    MakharejUser newUser,
-  ) {
-    user = newUser;
-    emitter(RegistrationSuccess(user!));
+    User newUser,
+  ) async {
+    var response = await userProvider.registerNewUser(newUser);
+    response.fold(
+      (exception) => emitter(RegisterationFailedState(exception.toString())),
+      (makharejUser) {
+        user = makharejUser;
+        emitter(RegistrationSuccess(user!));
+      },
+    );
   }
 
   void onSignUpFailed(

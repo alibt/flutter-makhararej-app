@@ -28,28 +28,38 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      if (state is AuthenticatedState) RoutePaths.navigateHome();
-      if (state is UnAuthenticatedState) {
-        RoutePaths.navigateLoginScreen();
-      }
-    }, builder: (context, state) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Spaces.VERTICAL_XL,
-              const Text(
-                "Makharej App",
+    return BlocConsumer<AuthBloc, AuthState>(
+        listener: authBlocListener,
+        builder: (context, state) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Spaces.VERTICAL_XL,
+                  const Text(
+                    "Makharej App",
+                  ),
+                  const Text("It is simple to use!"),
+                  Spaces.VERTICAL_XL,
+                  if (state.isLoading) const CircularProgressIndicator()
+                ],
               ),
-              const Text("It is simple to use!"),
-              Spaces.VERTICAL_XL,
-              if (state.isLoading) const CircularProgressIndicator()
-            ],
-          ),
-        ),
-      );
-    });
+            ),
+          );
+        });
+  }
+
+  void authBlocListener(context, state) {
+    if (state is AuthenticatedState) {
+      if (state.user?.familyID == null) {
+        RoutePaths.navigateFamilyScreen();
+        return;
+      }
+      RoutePaths.navigateHome();
+    }
+    if (state is UnAuthenticatedState) {
+      RoutePaths.navigateLoginScreen();
+    }
   }
 }

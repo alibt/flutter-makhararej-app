@@ -25,9 +25,6 @@ class UserProvider {
       User firebaseUser) async {
     try {
       final makharejUser = await _addUser(firebaseUser);
-      final familyID = await _createFamilyWithUser(makharejUser.userID);
-      makharejUser.familyID = familyID;
-      await updateUser(makharejUser);
       return right(makharejUser);
     } on Exception catch (e) {
       return left(e);
@@ -43,17 +40,6 @@ class UserProvider {
               makahrejUser.toJson(),
             );
     return makahrejUser;
-  }
-
-  Future<String> _createFamilyWithUser(String uid) async {
-    final db = FirebaseFirestore.instance;
-
-    final familyReference = await db.collection(CollectionNames.families).add(
-      {
-        'users': [uid]
-      },
-    );
-    return familyReference.id;
   }
 
   Future<void> updateUser(MakharejUser user) async {
