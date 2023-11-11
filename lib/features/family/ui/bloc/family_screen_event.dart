@@ -1,14 +1,20 @@
-abstract class FamilyScreenEvent {
-  final String uid;
+import 'package:makharej_app/features/profile/model/makharej_user.dart';
 
-  FamilyScreenEvent(this.uid);
+abstract class FamilyScreenEvent {
+  final MakharejUser user;
+
+  FamilyScreenEvent(this.user);
 }
 
 class FamilyScreenJoinFamilyEvent extends FamilyScreenEvent {
   final String familyId;
-  FamilyScreenJoinFamilyEvent(this.familyId, String uid) : super(uid);
+
+  FamilyScreenJoinFamilyEvent(
+    this.familyId,
+    MakharejUser makharejUser,
+  ) : super(makharejUser);
 }
 
 class FamilyScreenCreateFamilyEvent extends FamilyScreenEvent {
-  FamilyScreenCreateFamilyEvent(super.uid);
+  FamilyScreenCreateFamilyEvent(super.user);
 }

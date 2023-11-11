@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:makharej_app/features/family/provider/family_provider.dart';
 import 'package:makharej_app/features/family/ui/bloc/family_screen_event.dart';
 import 'package:makharej_app/features/family/ui/bloc/family_screen_state.dart';
+import 'package:makharej_app/features/profile/model/makharej_user.dart';
 import 'package:makharej_app/features/profile/provider/user_provider.dart';
 
 class FamilyBloc extends Bloc<FamilyScreenEvent, FamilyScreenState> {
@@ -29,7 +30,32 @@ class FamilyBloc extends Bloc<FamilyScreenEvent, FamilyScreenState> {
     Emitter<FamilyScreenState> emitter,
   ) async {
     emitter(state.copyWith(isLoading: true));
-    familyProvider.createFamily(event.uid);
+    var response = await familyProvider.createFamily(event.user.userID);
+    response.fold(
+      (exception) => emitter(
+        FamilyScreenErrorState(exception.toString()),
+      ),
+      (familyID) async => await onSuccessfullyCreateFamily(
+        familyID,
+        emitter,
+        event.user,
+      ),
+    );
     emitter(state.copyWith(isLoading: false));
+  }
+
+  Future<void> onSuccessfullyCreateFamily(String familyID,
+      Emitter<FamilyScreenState> emitter, MakharejUser user) async {
+    var response =
+        await userProvider.updateUser(user.copyWith(familyID: familyID));
+    response.fold(
+      (exception) => emitter(
+        FamilyScreenErrorState(exception.toString()),
+      ),
+      (user) => emitter(
+        const FamilyScreenSuccessState(),
+      ),
+    );
+    emitter(const FamilyScreenSuccessState());
   }
 }

@@ -42,10 +42,15 @@ class UserProvider {
     return makahrejUser;
   }
 
-  Future<void> updateUser(MakharejUser user) async {
-    final db = FirebaseFirestore.instance;
-    await db.collection(CollectionNames.users).doc(user.userID).update(
-          user.toJson(),
-        );
+  Future<Either<Exception, MakharejUser>> updateUser(MakharejUser user) async {
+    try {
+      final db = FirebaseFirestore.instance;
+      await db.collection(CollectionNames.users).doc(user.userID).update(
+            user.toJson(),
+          );
+      return right(user);
+    } catch (e) {
+      return left(Exception(e.toString()));
+    }
   }
 }

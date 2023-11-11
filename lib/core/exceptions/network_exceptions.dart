@@ -4,3 +4,11 @@ abstract class NetworkException implements Exception {
 }
 
 class ConnectionException implements NetworkException {}
+
+class RequestFailedExcetion implements NetworkException {
+  final String message;
+
+  RequestFailedExcetion(this.message);
+  @override
+  String toString() => message;
+}

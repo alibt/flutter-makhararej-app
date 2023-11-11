@@ -33,6 +33,9 @@ class MakharejApp extends StatelessWidget {
               context.read<FirebaseAuthProvider>(),
             ),
           ),
+          RepositoryProvider<UserProvider>(
+            create: (context) => UserProvider(),
+          ),
         ],
         child: MultiBlocProvider(
           providers: [

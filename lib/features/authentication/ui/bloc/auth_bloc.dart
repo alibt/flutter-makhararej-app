@@ -112,11 +112,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await authService.signUp(email: event.email, password: event.password);
     result.fold<void>(
       (exception) => onSignUpFailed(exception, emitter),
-      (user) => onSignUpSuccess(emitter, user),
+      (user) async => onSignUpSuccess(emitter, user),
     );
   }
 
-  void onSignUpSuccess(
+  Future<void> onSignUpSuccess(
     Emitter<AuthState> emitter,
     User newUser,
   ) async {

@@ -11,9 +11,9 @@ class MakharejUser {
 
   factory MakharejUser.fromJson(Map<String, dynamic> json) {
     return MakharejUser(
-      email: json['email'] as String,
-      userID: json['userID'] as String,
-      familyID: json['familyID'] as String,
+      email: json['email'],
+      userID: json['userID'],
+      familyID: json['familyID'],
     );
   }
 
@@ -22,4 +22,16 @@ class MakharejUser {
         'userID': userID,
         'familyID': familyID,
       };
+
+  MakharejUser copyWith({
+    String? email,
+    String? userID,
+    String? familyID,
+  }) {
+    return MakharejUser(
+      email: email ?? this.email,
+      userID: userID ?? this.userID,
+      familyID: familyID ?? this.familyID,
+    );
+  }
 }

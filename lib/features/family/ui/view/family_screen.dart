@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makharej_app/core/navigation/route_paths.dart';
 import 'package:makharej_app/core/utils/widgets/spaces.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_bloc.dart';
 import 'package:makharej_app/features/family/ui/bloc/family_screen_bloc.dart';
@@ -27,91 +28,118 @@ class _FamilyScreenState extends State<FamilyScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FamilyBloc, FamilyScreenState>(
-        listener: (context, state) {},
+        listener: familyBlocListener,
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
               title: const Text('Family'),
             ),
-            body: Stack(
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              createFamilyIsSelected = true;
-                            });
-                          },
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            color: createFamilyIsSelected == true
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey,
-                            child: const Center(
-                              child: Text('Create Family'),
+            body: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Stack(
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(flex: 1),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                createFamilyIsSelected = true;
+                              });
+                            },
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: createFamilyIsSelected == true
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey,
+                              ),
+                              child: const Center(
+                                child: Text('Create Family'),
+                              ),
                             ),
                           ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              createFamilyIsSelected = false;
-                            });
-                          },
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            color: createFamilyIsSelected == false
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey,
-                            child: const Center(
-                              child: Text('Join Family'),
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                createFamilyIsSelected = false;
+                              });
+                            },
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: createFamilyIsSelected == false
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey,
+                              ),
+                              child: const Center(
+                                child: Text('Join Family'),
+                              ),
                             ),
-                          ),
-                        )
-                      ],
-                    ),
-                    Spaces.VERTICAL_XL,
-                    if (createFamilyIsSelected == false)
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Family Code',
-                        ),
+                          )
+                        ],
                       ),
-                    Spaces.VERTICAL_XL,
-                    ElevatedButton(
-                      onPressed: createFamilyIsSelected != null
-                          ? onGoButtonTapped
-                          : null,
-                      child: const Text('Go'),
-                    ),
-                  ],
-                ),
-                if (state.isLoading)
-                  const Center(
-                    child: CircularProgressIndicator(),
+                      const Spacer(flex: 2),
+                      if (createFamilyIsSelected == false)
+                        TextFormField(
+                          decoration: const InputDecoration(
+                            labelText: 'Family Code',
+                          ),
+                        ),
+                      Spaces.VERTICAL_XL,
+                      ElevatedButton(
+                        onPressed: createFamilyIsSelected != null
+                            ? onGoButtonTapped
+                            : null,
+                        child: const Text('Go'),
+                      ),
+                      const Spacer(flex: 1),
+                    ],
                   ),
-              ],
+                  if (state.isLoading)
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
             ),
           );
         });
   }
 
+  void familyBlocListener(context, state) {
+    if (state is FamilyScreenSuccessState) {
+      RoutePaths.navigateHome();
+      return;
+    }
+    if (state is FamilyScreenErrorState) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+          state.toString(),
+        )),
+      );
+    }
+  }
+
   void onGoButtonTapped() {
     if (createFamilyIsSelected!) {
       BlocProvider.of<FamilyBloc>(context).add(
-        FamilyScreenCreateFamilyEvent(context.read<AuthBloc>().user!.userID),
+        FamilyScreenCreateFamilyEvent(context.read<AuthBloc>().user!),
       );
     } else {
       BlocProvider.of<FamilyBloc>(context).add(
         FamilyScreenJoinFamilyEvent(
-          context.read<AuthBloc>().user!.userID,
           familyCodeController.text,
+          context.read<AuthBloc>().user!,
         ),
       );
     }

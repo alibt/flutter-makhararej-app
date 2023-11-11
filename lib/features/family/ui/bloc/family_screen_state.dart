@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:makharej_app/features/family/model/family.dart';
 
 @immutable
 class FamilyScreenState extends Equatable {
@@ -18,12 +17,11 @@ class FamilyScreenState extends Equatable {
 
 class FamilyScreenInitial extends FamilyScreenState {}
 
-class FamilyScreenError extends FamilyScreenState {
+class FamilyScreenErrorState extends FamilyScreenState {
   final String message;
-  const FamilyScreenError(this.message);
+  const FamilyScreenErrorState(this.message);
 }
 
-class FamilyScreenSuccess extends FamilyScreenState {
-  final Family family;
-  const FamilyScreenSuccess(this.family);
+class FamilyScreenSuccessState extends FamilyScreenState {
+  const FamilyScreenSuccessState();
 }
