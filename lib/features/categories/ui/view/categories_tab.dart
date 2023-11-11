@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makharej_app/features/authentication/ui/bloc/auth_bloc.dart';
 import 'package:makharej_app/features/categories/ui/bloc/categories_bloc.dart';
 import 'package:makharej_app/features/categories/ui/bloc/categories_event.dart';
 import 'package:makharej_app/features/categories/ui/bloc/categories_state.dart';
@@ -17,7 +18,11 @@ class _CategoriesTabState extends State<CategoriesTab> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      context.read<CategoriesBloc>().add(CategoryFetchListEvent());
+      context.read<CategoriesBloc>().add(
+            CategoryFetchListEvent(
+              makharejUser: BlocProvider.of<AuthBloc>(context).user!,
+            ),
+          );
     });
     super.initState();
   }

@@ -11,7 +11,7 @@ class CategoryProvider {
 
   CategoryProvider(this.authService);
 
-  Future<Either<List<MakharejCategory>, Exception>> getCategories(
+  Future<Either<List<MakharejCategory>, Exception>> getCategoriesByFamilyID(
       String familyID) async {
     await Future.delayed(const Duration(seconds: 2));
     if (mockCategories) {
@@ -32,8 +32,9 @@ class CategoryProvider {
       final categoriesList = <MakharejCategory>[];
       await db
           .collection(
-            CollectionNames.getCategoriesPath(familyID),
+            CollectionNames.categories,
           )
+          .where('familyID', isEqualTo: familyID)
           .get()
           .then(
         (categories) {

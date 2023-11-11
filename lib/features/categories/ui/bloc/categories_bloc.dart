@@ -20,7 +20,9 @@ class CategoriesBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     emitter(CategoriesLoadingState(categories));
 
-    var result = await categoryProvider.getCategories("");
+    var result = await categoryProvider.getCategoriesByFamilyID(
+      event.makharejUser.familyID!,
+    );
     result.fold(
         (categoriesList) =>
             _onSuccesfullyFetchedCategoriesList(categoriesList, emitter),
