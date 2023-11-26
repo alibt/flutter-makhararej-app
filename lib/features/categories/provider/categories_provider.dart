@@ -13,7 +13,6 @@ class CategoryProvider {
 
   Future<Either<List<MakharejCategory>, Exception>> getCategoriesByFamilyID(
       String familyID) async {
-    await Future.delayed(const Duration(seconds: 2));
     if (mockCategories) {
       try {
         var categoriesList = <MakharejCategory>[];
