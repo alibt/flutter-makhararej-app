@@ -53,7 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void authBlocListener(context, state) {
     if (state is AuthenticatedState) {
       if (state.user?.familyID == null) {
-        RoutePaths.navigateFamilyScreen();
+        RoutePaths.navigateFamilyScreen(true);
         return;
       }
       RoutePaths.navigateHome();

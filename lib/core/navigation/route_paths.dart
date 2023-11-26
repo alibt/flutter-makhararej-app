@@ -17,7 +17,11 @@ class RoutePaths {
     navigatorKey.currentState?.pushNamed(signUpScreen);
   }
 
-  static void navigateFamilyScreen() {
+  static void navigateFamilyScreen(bool shouldReplace) {
+    if (shouldReplace) {
+      navigatorKey.currentState?.pushReplacementNamed(familyScreen);
+      return;
+    }
     navigatorKey.currentState?.pushNamed(familyScreen);
   }
 }

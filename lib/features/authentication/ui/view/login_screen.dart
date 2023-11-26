@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
       if (state.user?.familyID == null) {
-        RoutePaths.navigateFamilyScreen();
+        RoutePaths.navigateFamilyScreen(true);
         return;
       }
     }
