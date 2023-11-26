@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:makharej_app/core/exceptions/auth_exception.dart';
@@ -18,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginWithGoogleEvent>(handleLoginUsingGoogle);
     on<SignUpEvent>(handleSignUp);
     on<CheckAuthStateEvent>(onCheckAuthorizationState);
+    on<UpdateUserFamilyEvent>(handleUpdateUserFamily);
   }
 
   Future<void> handleSignInUsingEmailAndPassword(
@@ -110,9 +113,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     var result =
         await authService.signUp(email: event.email, password: event.password);
-    result.fold<void>(
+
+    await result.fold<FutureOr<void>>(
       (exception) => onSignUpFailed(exception, emitter),
-      (user) async => onSignUpSuccess(emitter, user),
+      (user) async => await onSignUpSuccess(emitter, user),
     );
   }
 
@@ -157,5 +161,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
     emitter(UnAuthenticatedState());
+  }
+
+  FutureOr<void> handleUpdateUserFamily(
+      UpdateUserFamilyEvent event, Emitter<AuthState> emit) {
+    user = user!.copyWith(familyID: event.familyID);
   }
 }

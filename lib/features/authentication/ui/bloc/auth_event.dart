@@ -31,3 +31,9 @@ class SignUpEvent extends AuthEvent {
 
   SignUpEvent(this.email, this.password);
 }
+
+class UpdateUserFamilyEvent extends AuthEvent {
+  final String familyID;
+
+  UpdateUserFamilyEvent(this.familyID);
+}

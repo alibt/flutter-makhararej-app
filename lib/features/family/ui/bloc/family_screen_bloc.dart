@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:makharej_app/features/family/provider/family_provider.dart';
 import 'package:makharej_app/features/family/ui/bloc/family_screen_event.dart';
@@ -31,7 +33,7 @@ class FamilyBloc extends Bloc<FamilyScreenEvent, FamilyScreenState> {
   ) async {
     emitter(state.copyWith(isLoading: true));
     var response = await familyProvider.createFamily(event.user.userID);
-    response.fold(
+    await response.fold<FutureOr<void>>(
       (exception) => emitter(
         FamilyScreenErrorState(exception.toString()),
       ),
@@ -41,7 +43,6 @@ class FamilyBloc extends Bloc<FamilyScreenEvent, FamilyScreenState> {
         event.user,
       ),
     );
-    emitter(state.copyWith(isLoading: false));
   }
 
   Future<void> onSuccessfullyCreateFamily(String familyID,
@@ -50,12 +51,13 @@ class FamilyBloc extends Bloc<FamilyScreenEvent, FamilyScreenState> {
         await userProvider.updateUser(user.copyWith(familyID: familyID));
     response.fold(
       (exception) => emitter(
-        FamilyScreenErrorState(exception.toString()),
+        FamilyScreenErrorState(
+          exception.toString(),
+        ),
       ),
       (user) => emitter(
         const FamilyScreenSuccessState(),
       ),
     );
-    emitter(const FamilyScreenSuccessState());
   }
 }

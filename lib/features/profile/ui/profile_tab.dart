@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makharej_app/core/navigation/route_paths.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_bloc.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_event.dart';
 import 'package:makharej_app/features/authentication/ui/bloc/auth_state.dart';
@@ -11,7 +12,12 @@ class ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthInitState) {
+          RoutePaths.navigateLoginScreen();
+        }
+      },
       builder: (context, state) {
         return Stack(
           children: [
